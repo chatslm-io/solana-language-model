@@ -1,0 +1,9 @@
+[package]
+name="slm-tfhe-sbf-probe"
+version="0.1.0"
+edition="2021"
+[lib]
+crate-type=["cdylib"]
+[dependencies]
+tfhe={version="=1.4.3",default-features=false,features=["boolean","software-prng"]}
+getrandom={version="=0.2.17",features=["custom"]}

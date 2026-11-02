@@ -1,0 +1,20 @@
+[package]
+name = "slm-private-inference"
+version = "0.1.0"
+edition = "2021"
+publish = false
+[lib]
+crate-type = ["cdylib", "lib"]
+[dependencies]
+solana-program = "=2.3.0"
+slm-private-crypto = { path = "../crypto-core", default-features = false, optional = true }
+[features]
+no-entrypoint = []
+test-only-mock-evaluator = []
+experimental-half-gates = ["dep:slm-private-crypto"]
+experimental-circuit = ["dep:slm-private-crypto"]
+experimental-stream = ["dep:slm-private-crypto"]
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1

@@ -1,0 +1,21 @@
+[package]
+name = "slm-fhe-ntt-bench"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+solana-program = "=2.3.0"
+tfhe-ntt = { version = "=0.7.1", default-features = false }
+
+[features]
+default = ["custom-heap"]
+custom-heap = []
+
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
