@@ -1,0 +1,17 @@
+[package]
+name = "slm-public-kernel"
+version = "0.1.0"
+edition = "2021"
+publish = false
+[lib]
+crate-type = ["cdylib", "lib"]
+[dependencies]
+solana-program = "=2.3.0"
+libm = "=0.2.15"
+[features]
+default = ["entrypoint"]
+entrypoint = []
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
