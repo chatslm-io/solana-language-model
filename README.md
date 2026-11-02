@@ -8,6 +8,76 @@ SLM provides fully working on-chain inference. Model weights reside in Solana ac
 
 This repository provides the program, model compiler, transaction client, local-validator verification harness, and local storage/operator interface for running SLM yourself. Configure your own checkpoint, wallets, RPC endpoints, and deployment addresses using the included examples.
 
+## How on-chain inference works
+
+The client compiles a checkpoint into model weights and an execution plan, then publishes and seals those accounts on Solana. For each request, it submits batches of instructions that advance the inference session. The Solana program reads the stored model data, performs the model arithmetic, and writes intermediate state and generated tokens to accounts.
+
+```mermaid
+flowchart TD
+    subgraph Client[Client]
+        A[Checkpoint and model compiler]
+        B[Prompt token IDs and requested output count]
+        C[Sign and submit instruction batches]
+        D[Read finalized output token IDs]
+    end
+
+    subgraph Solana[Solana blockchain]
+        W[Sealed model weights and execution-plan accounts]
+        S[Create inference session and state accounts]
+        P[SLM program executes model computations]
+        T[Persist intermediate state and advance execution cursor]
+        O[Write generated token IDs to session]
+        F[Finalize transactions and output]
+        R[Close temporary accounts and refund rent]
+    end
+
+    A -->|Upload and seal transactions| W
+    B --> C
+    C -->|Session setup transactions| S
+    C -->|Inference transactions| P
+    S --> P
+    W -->|Read weights and plan| P
+    P --> T
+    T -->|Next instruction batch| P
+    T -->|Forward pass complete| O
+    O -->|Additional token requested| P
+    O -->|Generation complete| F
+    F --> D
+    D -->|Cleanup transaction| R
+```
+
+Model accounts remain available for subsequent requests. The local mainnet-clone workflow executes the same inference program in a local Solana validator using test SOL.
+
+## Live on Solana mainnet
+
+SLM is running live on Solana mainnet at **[chatslm.io/chat](https://chatslm.io/chat)**. The chat interface lets you interact with the deployed language model, with its weights stored on Solana and inference executed by the on-chain program.
+
+Visit the app to use the live deployment, or follow the setup instructions below to run SLM yourself.
+
+## Verified local mainnet-clone results
+
+**PASS — complete on-chain model execution, finalized output, and verified rent recovery.** The cleaned-up public repository completed this run using `solana-test-validator` **3.1.10**, with the public Memo program cloned from mainnet and the model accounts preloaded at genesis. All inference computations executed in the validator’s Solana program runtime.
+
+| Measurement                                                     | Recorded result                            |
+| --------------------------------------------------------------- | ------------------------------------------ |
+| Completed model forward passes                                  | 1                                          |
+| Model commands executed                                         | 1,176                                      |
+| Inference transactions                                          | 150                                        |
+| Total transactions, including setup and cleanup                 | 158                                        |
+| Generated output token ID                                       | `1047`                                     |
+| Finality                                                        | All transactions finalized before return   |
+| Temporary account cleanup and rent refund                       | Verified                                   |
+| Refunded rent                                                   | 157,240,320 lamports · 0.15724032 test SOL |
+| Total transaction fees                                          | 790,000 lamports · 0.00079 test SOL        |
+| Model execution phase, including finalized output barrier       | 121.665 seconds                            |
+| Runner duration, including local funding, finality, and cleanup | 152.254 seconds                            |
+| Maximum compute units in one transaction                        | 929,068                                    |
+| Maximum serialized transaction size                             | 877 bytes                                  |
+
+The runner reported `inferenceExecuted: true`, `finalizedBeforeReturn: true`, and `refundVerified: true`, then shut down the local validator successfully. It used confirmed progression with finalized checkpoints every 64 transactions and before accepting the output and refund.
+
+These measurements cover inference and cleanup with preloaded model accounts. Transaction-based model publication is covered by the separate upload/restart workflow described in [Local mainnet-clone verification](#local-mainnet-clone-verification). Run the standard command in that section to reproduce this test with your configured checkpoint. The table summarizes the recorded run; raw ledgers, logs, wallet details, and private configuration remain outside the published files.
+
 ## Requirements
 
 - Node.js 24 and npm; install dependencies with `npm ci`.
