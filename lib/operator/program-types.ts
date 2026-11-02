@@ -1,0 +1,45 @@
+import type { Network } from "./config";
+export type ProgramReceipt = {
+  signature: string;
+  lastValidBlockHeight: string;
+  kind: "buffer" | "write" | "deploy" | "recover";
+  offset?: number;
+  status: "signed" | "finalized" | "failed" | "expired";
+  fee: string;
+  reclaim?: string;
+};
+export type ProgramJob = {
+  id: string;
+  cluster: Network;
+  owner: string;
+  nonce: string;
+  program: string;
+  programData: string;
+  buffer: string;
+  binaryHash: string;
+  binaryBytes: number;
+  bufferRent: string;
+  programRent: string;
+  codeRent: string;
+  deposit: string;
+  estimatedFees: string;
+  feeBudget: string;
+  feesReserved: string;
+  recoveryFeeBudget: string;
+  recoveryFeesReserved: string;
+  transactionBudget: number;
+  transactions: number;
+  totalTransactions: number;
+  completedTransactions: number;
+  writtenBytes: number;
+  quotedAt: number;
+  approved: boolean;
+  phase: "ready" | "running" | "paused" | "failed" | "complete" | "recovered";
+  intent: "deploy" | "recover";
+  message: string;
+  journal: ProgramReceipt[];
+};
+export type PublicProgramJob = Omit<ProgramJob, "journal" | "nonce"> & {
+  lastSignature?: string;
+};
+export type ProgramPins = Partial<Record<Network, string>>;

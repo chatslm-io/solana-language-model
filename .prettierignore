@@ -1,0 +1,6 @@
+node_modules
+.next
+program/target
+recovery/dist
+package-lock.json
+SLM_ONCHAIN_SPEC.md

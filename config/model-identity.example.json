@@ -1,0 +1,7 @@
+{
+  "repo": "YOUR_ORGANIZATION/YOUR_MODEL",
+  "revision": "REPLACE_WITH_40_CHARACTER_COMMIT_HASH",
+  "file": "YOUR_CHECKPOINT.gguf",
+  "sha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+  "bytes": 0
+}
